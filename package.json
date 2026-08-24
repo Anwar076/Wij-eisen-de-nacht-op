@@ -1,0 +1,78 @@
+{
+  "name": "nachtveilig",
+  "version": "1.0.0",
+  "description": "NachtVeilig - community safety reporting MVP",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "cleanup:sensitive": "tsx scripts/cleanup.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anwar076/Wij-eisen-de-nacht-op.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Anwar076/Wij-eisen-de-nacht-op/issues"
+  },
+  "homepage": "https://github.com/Anwar076/Wij-eisen-de-nacht-op#readme",
+  "private": true,
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.3",
+    "@hookform/resolvers": "^5.9.1",
+    "@prisma/client": "^6.16.2",
+    "bcryptjs": "^3.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "jose": "^6.2.10",
+    "lucide-react": "^1.33.0",
+    "maplibre-gl": "^6.5.0",
+    "next": "^16.3.2",
+    "next-auth": "^4.24.15",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-hook-form": "^7.86.0",
+    "tailwind-merge": "^3.6.0",
+    "uuid": "^14.0.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.6",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "autoprefixer": "^10.5.4",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.2",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.62.1",
+    "postcss": "^8.5.26",
+    "prisma": "^6.16.2",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.12",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
+  }
+}
