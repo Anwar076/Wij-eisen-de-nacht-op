@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  PUBLISHED
+  REJECTED
+  HIDDEN
+  REMOVED
+}
+
+enum ApproximateTime {
+  UNKNOWN
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+}
+
+enum NotificationType {
+  SAFETY_ALERT
+  MODERATION_UPDATE
+  SYSTEM
+}
+
+enum ModerationAction {
+  APPROVE
+  REJECT
+  HIDE
+  REMOVE
+  REDACT
+}
+
+model User {
+  id                       String           @id @default(cuid())
+  email                    String           @unique
+  emailVerified            DateTime?
+  passwordHash             String
+  name                     String?
+  role                     UserRole         @default(USER)
+  preferredLanguage        String           @default("nl")
+  reports                  Report[]
+  savedLocations           SavedLocation[]
+  alerts                   SafetyAlert[]
+  notifications            Notification[]
+  moderationActions        Report[]         @relation("ModeratedBy")
+  moderationLogs           ReportModeration[]
+  trustedContacts          TrustedContact[]
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+}
+
+model Report {
+  id                        String                   @id @default(cuid())
+  publicId                  String                   @unique
+  userId                    String?
+  user                      User?                    @relation(fields: [userId], references: [id])
+  anonymousAccessTokenHash  String?
+  latitudeProtected         String
+  longitudeProtected        String
+  publicLatitude            Float
+  publicLongitude           Float
+  locationLabel             String
+  city                      String?
+  municipality              String?
+  country                   String                   @default("NL")
+  occurredAt                DateTime
+  approximateTime           ApproximateTime          @default(UNKNOWN)
+  exactTimeUnknown          Boolean                  @default(false)
+  description               String
+  severity                  Int
+  status                    ReportStatus             @default(SUBMITTED)
+  reportSource              String                   @default("web")
+  isAnonymous               Boolean                  @default(true)
+  isPublic                  Boolean                  @default(false)
+  isDemoData                Boolean                  @default(false)
+  riskScore                 Float                    @default(0)
+  duplicateFlag             Boolean                  @default(false)
+  abuseIdentifierHash       String?
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  publishedAt               DateTime?
+  moderatedAt               DateTime?
+  moderatedById             String?
+  moderatedBy               User?                    @relation("ModeratedBy", fields: [moderatedById], references: [id])
+  categories                ReportCategoryRelation[]
+  evidence                  ReportEvidence[]
+  moderation                ReportModeration[]
+  statusHistory             ReportStatusHistory[]
+
+  @@index([status, createdAt])
+  @@index([city, occurredAt])
+}
+
+model ReportCategory {
+  id          String                   @id @default(cuid())
+  key         String                   @unique
+  labelNl     String
+  labelEn     String
+  relations   ReportCategoryRelation[]
+}
+
+model ReportCategoryRelation {
+  id          String         @id @default(cuid())
+  reportId    String
+  categoryId  String
+  report      Report         @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  category    ReportCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([reportId, categoryId])
+}
+
+model ReportEvidence {
+  id               String   @id @default(cuid())
+  reportId          String
+  report            Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  originalFilename  String
+  safeFilename      String
+  mimeType          String
+  fileSizeBytes     Int
+  uploadedAt        DateTime @default(now())
+  isPrivate         Boolean  @default(true)
+}
+
+model SavedLocation {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  latitude       Float
+  longitude      Float
+  radiusMeters   Int      @default(500)
+  createdAt      DateTime @default(now())
+  alerts         SafetyAlert[]
+}
+
+model SafetyAlert {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedLocationId String
+  savedLocation  SavedLocation @relation(fields: [savedLocationId], references: [id], onDelete: Cascade)
+  enabled        Boolean  @default(true)
+  radiusMeters   Int      @default(500)
+}
+
+model ReportModeration {
+  id             String           @id @default(cuid())
+  reportId        String
+  report          Report           @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  moderatorId     String
+  moderator       User             @relation(fields: [moderatorId], references: [id], onDelete: Cascade)
+  action          ModerationAction
+  note            String?
+  createdAt       DateTime         @default(now())
+}
+
+model ReportStatusHistory {
+  id             String       @id @default(cuid())
+  reportId        String
+  report          Report       @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  fromStatus      ReportStatus?
+  toStatus        ReportStatus
+  changedById     String?
+  changedAt       DateTime     @default(now())
+}
+
+model AdminAuditLog {
+  id             String   @id @default(cuid())
+  actorId         String?
+  action          String
+  targetType      String
+  targetId        String
+  metaJson        String?
+  createdAt       DateTime @default(now())
+}
+
+model Notification {
+  id             String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            NotificationType
+  title           String
+  body            String
+  readAt          DateTime?
+  createdAt       DateTime          @default(now())
+}
+
+model EmergencyResource {
+  id             String   @id @default(cuid())
+  countryCode     String
+  type            String
+  title           String
+  phone           String?
+  url             String?
+  description     String?
+  locale          String   @default("nl")
+  isActive        Boolean  @default(true)
+}
+
+model AppSetting {
+  key            String   @id
+  value          String
+  updatedAt      DateTime @updatedAt
+}
+
+model TrustedContact {
+  id                 String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String
+  relationshipLabel   String?
+  contactMethod       String
+  verified            Boolean  @default(false)
+}
+
+model SafetySession {
+  id               String   @id @default(cuid())
+  tokenHash         String   @unique
+  userId            String?
+  isActive          Boolean  @default(true)
+  expiresAt         DateTime
+  latestLatitude    Float?
+  latestLongitude   Float?
+  checkInMinutes    Int?
+  lastCheckInAt     DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

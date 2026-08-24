@@ -1,0 +1,17 @@
+{
+  "name": "NachtVeilig",
+  "short_name": "NachtVeilig",
+  "description": "Community veiligheidsplatform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1d4ed8",
+  "lang": "nl",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
